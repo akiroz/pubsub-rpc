@@ -15,7 +15,11 @@ export type PubSubClient = {
 
 const idDedup = new DedupCache(100);
 
-export async function register(client: PubSubClient, topic: string, handler: (arg: any) => Promise<any>) {
+export async function register<T extends { [k: string]: any }, R extends { [k: string]: any }>(
+    client: PubSubClient,
+    topic: string,
+    handler: (arg: T) => Promise<R>
+) {
     await client.subscribe(topic, async (msg) => {
         try {
             const { id, params } = MsgPack.decode(msg) as RPCRequest;

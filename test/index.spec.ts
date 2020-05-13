@@ -27,7 +27,7 @@ describe("RPC", () => {
     });
 
     it("can call remote function", async () => {
-        await RPC.register(pubSub, "topic/foo", async () => ({}));
+        await RPC.register(pubSub, "topic/foo", async (param) => param);
         await RPC.call(pubSub, "topic/foo");
     });
 
