@@ -33,7 +33,7 @@ describe("RPC", () => {
 
     it("can send/recv params/result", async () => {
         await RPC.register(pubSub, "topic/foo", async ({ a, b }) => ({ c: a+b }));
-        const c = await RPC.call(pubSub, "topic/foo", { a:2, b:3 });
+        const { c } = await RPC.call(pubSub, "topic/foo", { a:2, b:3 });
         assert.equal(c, 5);
     });
 
@@ -45,4 +45,7 @@ describe("RPC", () => {
             assert(err.message, "timeout");
         }
     });
+
 });
+
+after(() => process.exit(0));

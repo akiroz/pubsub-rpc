@@ -1,4 +1,4 @@
-import MsgPack from "@msgpack/msgpack";
+import * as MsgPack from "@msgpack/msgpack";
 import { EventEmitter } from "events";
 import DedupCache from "./dedupCache";
 import { encodeBase64URL, generateCallId } from "./util";

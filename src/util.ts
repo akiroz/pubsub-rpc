@@ -10,7 +10,7 @@ export function encodeBase64URL(data: Uint8Array): string {
 }
 
 export function generateCallId(size: number): Uint8Array {
-    if(window) {
+    if(typeof window !== 'undefined') {
         const id = new Uint8Array(size);
         if(window.crypto) window.crypto.getRandomValues(id);
         else for(let i = 0; i < size; i++) {

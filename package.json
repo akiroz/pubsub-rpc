@@ -4,7 +4,7 @@
     "main": "dist/main.js",
     "types": "dist/main.d.ts",
     "scripts": {
-        "test": "ts-mocha test/index.spec.ts",
+        "test": "ts-mocha test/nodejs.spec.ts",
         "prepublish": "tsc"
     },
     "dependencies": {
