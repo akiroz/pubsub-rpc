@@ -39,6 +39,12 @@ describe("RPC", () => {
         assert.equal(test2, "test2");
     });
 
+    it("can read topic from handler", async () => {
+        await RPC.register(pubSub, "topic/*", async (arg, topic) => ({ topic }));
+        const { topic } = await RPC.call(pubSub, "topic/foo");
+        assert.equal(topic, "topic/foo");
+    });
+
     it("should timeout if call took too long", async () => {
         await RPC.register(pubSub, "topic/foo", () => new Promise(() => {}));
         try {

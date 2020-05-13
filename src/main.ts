@@ -13,12 +13,16 @@ export type PubSubClient = {
     unsubscribe(topic: string): Promise<void>;
 };
 
+type ParamResult = { [k: string]: any };
+
+export type RPCHandler<P extends ParamResult, R extends ParamResult> = (param: P, topic: string) => Promise<R | void>;
+
 const idDedup = new DedupCache(100);
 
-export async function register<T extends { [k: string]: any }, R extends { [k: string]: any }>(
+export async function register<P extends ParamResult, R extends ParamResult>(
     client: PubSubClient,
     topic: string,
-    handler: (arg: T) => Promise<R>
+    handler: RPCHandler<P, R>
 ) {
     await client.subscribe(topic, async (msg, msgTopic) => {
         try {
@@ -27,8 +31,8 @@ export async function register<T extends { [k: string]: any }, R extends { [k: s
             const strId = encodeBase64URL(id);
             if (idDedup.has(strId)) throw Error("Duplicate call request");
             idDedup.put(strId);
-            const response = await handler(params)
-                .then((result) => ({ result }))
+            const response = await handler(params, msgTopic)
+                .then((r) => ({ result: r || {} }))
                 .catch((error) => ({ error }));
             await client.publish(`${msgTopic}/${strId}`, MsgPack.encode(response));
         } catch (err) {
