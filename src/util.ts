@@ -10,11 +10,14 @@ export function encodeBase64URL(data: Uint8Array): string {
 }
 
 export function generateCallId(size: number): Uint8Array {
-    if(typeof window !== 'undefined') {
+    if (typeof window !== 'undefined') {
         const id = new Uint8Array(size);
-        if(window.crypto) window.crypto.getRandomValues(id);
-        else for(let i = 0; i < size; i++) {
-            id[i] = Math.floor(Math.random() * 265);
+        if (window.crypto) window.crypto.getRandomValues(id);
+        else {
+            console.warn("[RiceRPC] No crypto module, using Math.random for call ID")
+            for (let i = 0; i < size; i++) {
+                id[i] = Math.floor(Math.random() * 265);
+            }
         }
         return id;
     } else {

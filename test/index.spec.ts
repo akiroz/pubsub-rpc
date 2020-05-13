@@ -10,17 +10,17 @@ describe("RPC", () => {
         pubSub = {
             publish(topic, payload) {
                 return new Promise(r => {
-                    setImmediate(() => ee.emit(topic, payload), r());
+                    setTimeout(() => (ee.emit(topic, payload), r()), 0);
                 });
             },
             subscribe(topic, handler) {
                 return new Promise(r => {
-                    setImmediate(() => ee.on(topic, handler), r());
+                    setTimeout(() => (ee.on(topic, handler), r()), 0);
                 });
             },
             unsubscribe(topic) {
                 return new Promise(r => {
-                    setImmediate(() => ee.removeAllListeners(topic), r());
+                    setTimeout(() => (ee.removeAllListeners(topic), r()), 0);
                 });
             }
         };
@@ -48,4 +48,4 @@ describe("RPC", () => {
 
 });
 
-after(() => process.exit(0));
+after(() => { if(typeof window === 'undefined') process.exit(0) });
