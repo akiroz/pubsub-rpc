@@ -13,13 +13,16 @@ export type PubSubClient = {
     unsubscribe(topic: string): Promise<void>;
 };
 
-type ParamResult = { [k: string]: any };
+export type RPCParamResult = { [k: string]: any };
 
-export type RPCHandler<P extends ParamResult, R extends ParamResult> = (param: P, topic: string) => Promise<R | void>;
+export type RPCHandler<P extends RPCParamResult, R extends RPCParamResult> = (
+    param: P,
+    topic: string
+) => Promise<R | void>;
 
 const idDedup = new DedupCache(100);
 
-export async function register<P extends ParamResult, R extends ParamResult>(
+export async function register<P extends RPCParamResult, R extends RPCParamResult>(
     client: PubSubClient,
     topic: string,
     handler: RPCHandler<P, R>
@@ -41,13 +44,19 @@ export async function register<P extends ParamResult, R extends ParamResult>(
     });
 }
 
+export const defaultCallOptions = {
+    timeout: 10000, // ms
+    idSize: 16, // bytes
+};
+
 export async function call(
     client: PubSubClient,
     topic: string,
-    params: any = {},
-    opt = { timeout: 10000 }
+    params: RPCParamResult = {},
+    opt: Partial<typeof defaultCallOptions> = defaultCallOptions
 ): Promise<any> {
-    const id = generateCallId(16);
+    opt = Object.assign({}, defaultCallOptions, opt);
+    const id = generateCallId(opt.idSize);
     const strId = encodeBase64URL(id);
     const ee = new EventEmitter2();
     const responseTopic = `${topic}/${strId}`;
@@ -63,7 +72,7 @@ export async function call(
         new Promise((rsov, rjct) =>
             setTimeout(() => {
                 client.unsubscribe(responseTopic);
-                rjct({ message: "timeout", data: { topic, params, opt } });
+                rjct({ message: "timeout", data: { topic, params, opt, id } });
             }, opt.timeout)
         ),
     ])) as Uint8Array;
