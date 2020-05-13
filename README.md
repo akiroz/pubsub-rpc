@@ -1,5 +1,7 @@
 # PubSub RPC
 
+![test](https://github.com/akiroz/pubsub-rpc/workflows/test/badge.svg)
+
 A generic RPC mechanism for Pub/Sub transports based on MsgPack
 
 Supports NodeJS and modern browsers.
