@@ -1,6 +1,6 @@
 {
     "name": "@akiroz/pubsub-rpc",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "main": "dist/main.js",
     "types": "dist/main.d.ts",
     "scripts": {
@@ -10,7 +10,7 @@
     },
     "dependencies": {
         "@msgpack/msgpack": "^1.12.1",
-        "events": "^3.1.0"
+        "eventemitter2": "^6.4.0"
     },
     "devDependencies": {
         "@types/mocha": "^7.0.2",
