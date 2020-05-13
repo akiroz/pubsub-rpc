@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+        "lib": ["es2018", "esnext.bigint", "DOM"],
+        "esModuleInterop": true,
+        "downlevelIteration": true,
+        "declaration": true,
+        "outDir": "dist"
+    },
+    "include": ["src/**/*.ts"]
+}

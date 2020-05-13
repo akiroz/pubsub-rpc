@@ -1,0 +1,35 @@
+{
+    "name": "@rice/rpc",
+    "version": "0.0.1",
+    "main": "dist/main.js",
+    "types": "dist/main.d.ts",
+    "scripts": {
+        "test": "ts-mocha test/index.spec.ts",
+        "prepublish": "tsc"
+    },
+    "dependencies": {
+        "@msgpack/msgpack": "^1.12.1",
+        "events": "^3.1.0"
+    },
+    "devDependencies": {
+        "@types/mocha": "^7.0.2",
+        "@types/node": "^13.9.1",
+        "husky": "^4.2.3",
+        "mocha": "^7.1.1",
+        "parcel-bundler": "^1.12.4",
+        "prettier": "^2.0.5",
+        "pretty-quick": "^2.0.1",
+        "ts-mocha": "^7.0.0",
+        "typescript": "^3.8.3"
+    },
+    "prettier": {
+        "tabWidth": 4,
+        "trailingComma": "es5",
+        "printWidth": 120
+    },
+    "husky": {
+        "hooks": {
+            "pre-commit": "tsc --noEmit && pretty-quick --staged"
+        }
+    }
+}
