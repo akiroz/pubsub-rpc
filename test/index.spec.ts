@@ -48,7 +48,24 @@ describe("RPC", () => {
     it("should timeout if call took too long", async () => {
         await RPC.register(pubSub, "topic/foo", () => new Promise(() => {}));
         try {
-            await RPC.call(pubSub, "topic/foo", {}, { timeout: 50 });
+            await RPC.call(pubSub, "topic/foo", {}, { timeout: 20 });
+        } catch (err) {
+            assert(err.message, "timeout");
+        }
+    });
+
+    it("should timeout if subscribe took too long", async () => {
+        try {
+            await RPC.call(
+                {
+                    publish: (topic, payload) => new Promise(() => {}),
+                    subscribe: (topic, handler) => new Promise(() => {}),
+                    unsubscribe: (topic) => new Promise(() => {}),
+                },
+                "topic/foo",
+                {},
+                { timeout: 20 }
+            );
         } catch (err) {
             assert(err.message, "timeout");
         }
@@ -56,5 +73,7 @@ describe("RPC", () => {
 });
 
 after(() => {
-    if (typeof window === "undefined") process.exit(0);
+    if (typeof window === "undefined") {
+        setTimeout(() => process.exit(0), 100);
+    }
 });

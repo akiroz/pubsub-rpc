@@ -9,7 +9,7 @@ export type RPCResponse = { result: any } & { error: { message: string; data?: a
 
 export type PubSubClient = {
     publish(topic: string, payload: Uint8Array): Promise<void>;
-    subscribe(topic: string, handler: (payload: Uint8Array, topic: string) => void): Promise<void>;
+    subscribe(topic: string, handler: (payload: Uint8Array, topic: string) => Promise<void>): Promise<void>;
     unsubscribe(topic: string): Promise<void>;
 };
 
@@ -27,20 +27,19 @@ export async function register<P extends RPCParamResult, R extends RPCParamResul
     topic: string,
     handler: RPCHandler<P, R>
 ) {
-    await client.subscribe(topic, async (msg, msgTopic) => {
-        try {
-            const { id, params } = MsgPack.decode(msg) as RPCRequest;
-            if (!id) throw Error("Missing id in RPC call");
-            const strId = encodeBase64URL(id);
-            if (idDedup.has(strId)) throw Error("Duplicate call request");
-            idDedup.put(strId);
-            const response = await handler(params, msgTopic)
-                .then((r) => ({ result: r || {} }))
-                .catch((error) => ({ error }));
-            await client.publish(`${msgTopic}/${strId}`, MsgPack.encode(response));
-        } catch (err) {
-            console.warn("RPC processing error", err);
-        }
+    await client.subscribe(topic, async (payload, msgTopic) => {
+        if (!(payload instanceof Uint8Array)) throw Error(`Invalid payload: ${payload}`);
+        const msg = MsgPack.decode(payload) as RPCRequest;
+        if (!msg) throw Error(`Invalid payload: ${payload}`);
+        const { id, params } = msg;
+        if (!id) throw Error("Missing id in RPC call");
+        const strId = encodeBase64URL(id);
+        if (idDedup.has(strId)) throw Error("Duplicate call request");
+        idDedup.put(strId);
+        const response = await handler(params, msgTopic)
+            .then((r) => ({ result: r || {} }))
+            .catch((error) => ({ error }));
+        await client.publish(`${msgTopic}/${strId}`, MsgPack.encode(response));
     });
 }
 
@@ -60,15 +59,17 @@ export async function call(
     const strId = encodeBase64URL(id);
     const ee = new EventEmitter2();
     const responseTopic = `${topic}/${strId}`;
-    await client.subscribe(responseTopic, (msg) => ee.emit("resp", msg));
-    client.publish(topic, MsgPack.encode({ id, params }));
     const msg = (await Promise.race([
-        new Promise((rsov, rjct) =>
-            ee.once("resp", (payload) => {
-                client.unsubscribe(responseTopic);
-                rsov(payload);
-            })
-        ),
+        (async () => {
+            await client.subscribe(responseTopic, async (msg) => void ee.emit("resp", msg));
+            client.publish(topic, MsgPack.encode({ id, params }));
+            return await new Promise((rsov, rjct) =>
+                ee.once("resp", (payload) => {
+                    client.unsubscribe(responseTopic);
+                    rsov(payload);
+                })
+            );
+        })(),
         new Promise((rsov, rjct) =>
             setTimeout(() => {
                 client.unsubscribe(responseTopic);
