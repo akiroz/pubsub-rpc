@@ -4,6 +4,7 @@
         "esModuleInterop": true,
         "downlevelIteration": true,
         "declaration": true,
+        "sourceMap": true,
         "outDir": "dist"
     },
     "include": ["src/**/*.ts"]
