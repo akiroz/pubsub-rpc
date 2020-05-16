@@ -6,6 +6,12 @@ A generic RPC mechanism for Pub/Sub transports based on MsgPack
 
 Supports NodeJS and modern browsers.
 
+### Installing
+
+```
+$ yarn add @akiroz/pubsub-rpc
+```
+
 ### Why not JSON-RPC?
 
 Native binary support for passing large binary payloads.
@@ -21,10 +27,4 @@ Native binary support for passing large binary payloads.
 
 ## API
 
-```js
-await register(pubSubClient, topic, async (params, topic) => {
-    return result;
-});
-
-const result = await call(pubSubClient, topic, params);
-```
+![See tests](test/index.spec.ts) for a basic use case that simply uses an EventEmitter as the Pub/Sub mechanism.
