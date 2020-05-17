@@ -27,4 +27,4 @@ Native binary support for passing large binary payloads.
 
 ## API
 
-![See tests](test/index.spec.ts) for a basic use case that simply uses an EventEmitter as the Pub/Sub mechanism.
+[See tests](test/index.spec.ts) for a basic use case that simply uses an EventEmitter as the Pub/Sub mechanism.
