@@ -31,6 +31,18 @@ describe("RPC", () => {
         assert.equal(c, 5);
     });
 
+    it("can catch RPC errors", async () => {
+        await RPC.register(pubSub, "topic/foo", async () => {
+            throw { a: "foo" };
+        });
+        try {
+            await RPC.call(pubSub, "topic/foo");
+            throw "fail";
+        } catch ({ a }) {
+            assert.equal(a, "foo");
+        }
+    });
+
     it("can register with wildcards", async () => {
         await RPC.register(pubSub, "*/foo", async (param) => param);
         const { test1 } = await RPC.call(pubSub, "1/foo", { test1: "test1" });
