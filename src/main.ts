@@ -1,5 +1,5 @@
+import { EventEmitter } from "events";
 import * as MsgPack from "@msgpack/msgpack";
-import { EventEmitter2 } from "eventemitter2";
 import DedupCache from "./dedupCache";
 import { encodeBase64URL, generateCallId } from "./util";
 
@@ -57,7 +57,7 @@ export async function call(
     opt = Object.assign({}, defaultCallOptions, opt);
     const id = generateCallId(opt.idSize);
     const strId = encodeBase64URL(id);
-    const ee = new EventEmitter2();
+    const ee = new EventEmitter();
     const responseTopic = `${topic}/${strId}`;
     const msg = (await Promise.race([
         (async () => {
