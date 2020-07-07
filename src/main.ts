@@ -48,12 +48,12 @@ export const defaultCallOptions = {
     idSize: 16, // bytes
 };
 
-export async function call(
+export async function call<P extends RPCParamResult, R extends RPCParamResult>(
     client: PubSubClient,
     topic: string,
-    params: RPCParamResult = {},
+    params: P = {} as P,
     opt: Partial<typeof defaultCallOptions> = defaultCallOptions
-): Promise<any> {
+): Promise<R> {
     opt = Object.assign({}, defaultCallOptions, opt);
     const id = generateCallId(opt.idSize);
     const strId = encodeBase64URL(id);
