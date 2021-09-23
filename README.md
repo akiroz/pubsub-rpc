@@ -1,5 +1,6 @@
 # PubSub RPC
 
+[![](https://img.shields.io/npm/v/@akiroz/pubsub-rpc)](https://www.npmjs.com/package/@akiroz/pubsub-rpc)
 ![test](https://github.com/akiroz/pubsub-rpc/workflows/test/badge.svg)
 
 A generic RPC mechanism for Pub/Sub transports based on MsgPack
