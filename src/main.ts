@@ -1,4 +1,3 @@
-import { EventEmitter } from "events";
 import * as MsgPack from "@msgpack/msgpack";
 import DedupCache from "./dedupCache";
 import { encodeBase64URL, generateCallId } from "./util";
@@ -58,26 +57,21 @@ export async function call<P extends RPCParamResult, R extends RPCParamResult>(
     opt = Object.assign({}, defaultCallOptions, opt);
     const id = generateCallId(opt.idSize);
     const strId = encodeBase64URL(id);
-    const ee = new EventEmitter();
     const responseTopic = `${topic}/${strId}`;
-    const msg = (await Promise.race([
-        (async () => {
-            await client.subscribe(responseTopic, async (msg) => void ee.emit("resp", msg));
-            client.publish(topic, MsgPack.encode({ id, params }));
-            return await new Promise((rsov, rjct) =>
-                ee.once("resp", (payload) => {
-                    client.unsubscribe(responseTopic);
-                    rsov(payload);
-                })
-            );
-        })(),
-        new Promise((rsov, rjct) =>
-            setTimeout(() => {
+    const msg = await new Promise<Uint8Array>((rsov, rjct) => {
+        setTimeout(() => {
+            client.unsubscribe(responseTopic);
+            rjct({ message: "timeout", data: { topic, params, opt, id } });
+        }, opt.timeout);
+        client
+            .subscribe(responseTopic, async (msg) => {
                 client.unsubscribe(responseTopic);
-                rjct({ message: "timeout", data: { topic, params, opt, id } });
-            }, opt.timeout)
-        ),
-    ])) as Uint8Array;
+                rsov(msg);
+            })
+            .then(() => {
+                client.publish(topic, MsgPack.encode({ id, params }));
+            });
+    });
     const { result, error } = MsgPack.decode(msg) as RPCResponse;
     if (error) throw error;
     return result;
